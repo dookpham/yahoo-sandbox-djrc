@@ -23,10 +23,12 @@ var express = require('express')
   , routes = require('./routes');
 
 passport.serializeUser(function(user, done) {
+  console.log('serializeUser');
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
+  console.log('deserializeUser');
   done(null, obj);
 });
 
@@ -37,6 +39,7 @@ passport.use(
     callbackURL: (process.env.APP_URL || require('./conf.js').APP_URL) + '/auth/yahoo/callback'
   },
   function(token, tokenSecret, profile, done) {
+    console.log('token/profile', token, profile);
     var data = profile._json;
 
     var userObj = {
@@ -111,12 +114,14 @@ app.get('/data/:resource/:subresource', routes.getData);
 app.get('/auth/yahoo',
   passport.authenticate('yahoo', { failureRedirect: '/login' }),
   function(req, res, user) {
+    console.log('auth/yahoo:', req.body);
     res.redirect('/');
   });
 
 app.get('/auth/yahoo/callback',
   passport.authenticate('yahoo', { failureRedirect: '/login' }),
   function(req, res) {
+    console.log('yahoo callback:', req.body);
     res.redirect(req.session.redirect || '/');
   }
 );
@@ -132,7 +137,7 @@ http.createServer(app).listen(app.get('port'), function(){
 
 function checkAuth(req, res, next) {
   var userObj;
-
+  console.log('checkAuth', req.body, req.user, req.isAuthenticated());
   if (req.isAuthenticated()) {
     userObj = {
       name: req.user.name,
